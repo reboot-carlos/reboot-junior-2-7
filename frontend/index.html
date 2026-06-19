@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zachar IA - Chatbot Intelligent</title>
+  <link rel="stylesheet" href="css/chatbot-pro.css">
+  <style>
+    :root {
+      --primary: #FFD700;
+      --accent: #FFA500;
+      --dark: #0F0F1E;
+      --light: #FFFFFF;
+      --grad1: linear-gradient(135deg, #FFD700 0%, #1a1a2e 100%);
+      --grad2: linear-gradient(135deg, #FFD700, #FF8C00);
+      --grad-header: linear-gradient(135deg, #FFD700 0%, #000000 100%);
+    }
+
+    body.theme-neon {
+      --primary: #00FF88;
+      --accent: #FF006E;
+      --grad1: linear-gradient(135deg, #FF006E, #00FF88);
+      --grad2: linear-gradient(135deg, #FFB703, #FB5607);
+      --grad-header: linear-gradient(135deg, #00FF88 0%, #FF006E 100%);
+    }
+
+    body.theme-sunset {
+      --primary: #FF6B35;
+      --accent: #F7931E;
+      --grad1: linear-gradient(135deg, #FF6B35, #FDB462);
+      --grad2: linear-gradient(135deg, #004E89, #FF6B35);
+      --grad-header: linear-gradient(135deg, #FF6B35 0%, #000000 100%);
+    }
+
+    body.theme-ocean {
+      --primary: #00D9FF;
+      --accent: #0099CC;
+      --grad1: linear-gradient(135deg, #00D9FF, #0099CC);
+      --grad2: linear-gradient(135deg, #003D5B, #00D9FF);
+      --grad-header: linear-gradient(135deg, #FFFFFF 0%, #0099CC 100%);
+    }
+
+    body.theme-purple {
+      --primary: #BB86FC;
+      --accent: #9C27B0;
+      --grad1: linear-gradient(135deg, #BB86FC, #9C27B0);
+      --grad2: linear-gradient(135deg, #6A1B9A, #BB86FC);
+      --grad-header: linear-gradient(135deg, #BB86FC 0%, #000000 100%);
+    }
+
+    .game-container, .tool-container {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, #0F0F1E, #1a1a2e);
+      border: 3px solid var(--primary);
+      border-radius: 16px;
+      padding: 2rem;
+      z-index: 10001;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+    }
+
+    .game-container.show, .tool-container.show {
+      display: block;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { transform: translate(-50%, -50%) scale(0.9); opacity: 0; }
+      to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+
+    @keyframes glow {
+      0%, 100% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.3), 0 0 20px rgba(255, 215, 0, 0.2); }
+      50% { text-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.4), 0 0 60px rgba(255, 215, 0, 0.2); }
+    }
+
+    .zachar-title {
+      margin: 0 !important;
+      font-family: 'Georgia', serif !important;
+      font-size: 2.8rem !important;
+      font-weight: 700 !important;
+      letter-spacing: 4px !important;
+      color: #FFD700 !important;
+      text-shadow:
+        0 0 20px rgba(255, 215, 0, 0.8),
+        0 0 40px rgba(255, 165, 0, 0.4),
+        -2px -2px 5px rgba(0, 0, 0, 0.8),
+        2px 2px 5px rgba(255, 215, 0, 0.3) !important;
+      filter: drop-shadow(3px 3px 10px rgba(255, 215, 0, 0.5)) !important;
+      position: absolute !important;
+      left: 50% !important;
+      top: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      font-style: italic !important;
+    }
+
+    /* SIDEBAR OVERRIDE */
+    #app {
+      grid-template-columns: 1fr !important;
+      grid-template-rows: auto 1fr auto !important;
+      height: 100vh !important;
+    }
+
+    .sidebar {
+      position: fixed !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 280px !important;
+      height: 100vh !important;
+      z-index: 200 !important;
+      transform: translateX(-100%) !important;
+      transition: transform 0.3s ease !important;
+      grid-column: unset !important;
+      grid-row: unset !important;
+    }
+
+    .sidebar.open {
+      transform: translateX(0) !important;
+    }
+
+    .main-content {
+      grid-column: 1 / 2 !important;
+      grid-row: 1 / -1 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      height: 100vh !important;
+      width: 100% !important;
+    }
+
+    .header {
+      grid-column: 1 / 2 !important;
+      grid-row: 1 !important;
+      flex-shrink: 0 !important;
+    }
+
+    .chat-container {
+      grid-column: 1 / 2 !important;
+      grid-row: 2 !important;
+      flex: 1 !important;
+      overflow: hidden !important;
+    }
+
+    .zone-chat {
+      height: 100% !important;
+      flex: 1 !important;
+    }
+
+    .formulaire {
+      grid-column: 1 / 2 !important;
+      grid-row: 3 !important;
+      flex-shrink: 0 !important;
+    }
+
+    .sidebar-toggle {
+      display: block !important;
+    }
+
+    /* FIX HEADER POSITION */
+    .header {
+      position: relative !important;
+    }
+
+    /* FIX SETTINGS PANEL */
+    .settings-panel {
+      position: fixed !important;
+      top: 80px !important;
+      left: 1rem !important;
+      right: auto !important;
+      width: 320px !important;
+      background: linear-gradient(135deg, #0F0F1E, #1a1a2e) !important;
+      border: 2px solid var(--primary) !important;
+      backdrop-filter: none !important;
+      z-index: 10000 !important;
+    }
+
+    /* Overlay pour fermer sidebar */
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      z-index: 150;
+      cursor: pointer;
+    }
+
+    .sidebar.open ~ .sidebar-overlay {
+      display: block;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border: none;
+      color: var(--dark);
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1.3rem;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+    }
+
+    .modal-close:hover {
+      transform: rotate(90deg) scale(1.1);
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .game-btn {
+      padding: 0.8rem 1rem;
+      background: var(--grad1);
+      color: var(--dark);
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    }
+
+    .game-btn:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 8px 25px rgba(255, 107, 107, 0.5);
+    }
+
+    .game-btn:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    canvas {
+      border: 3px solid var(--primary);
+      margin: 1rem 0;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.3);
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+    }
+
+    h2 {
+      background: var(--grad1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .header {
+      background: var(--grad-header) !important;
+      border-bottom: 3px solid var(--primary) !important;
+      box-shadow: 0 8px 30px rgba(255, 215, 0, 0.2) !important;
+      backdrop-filter: none !important;
+    }
+
+    .header h1 {
+      color: #FFFFFF !important;
+      text-shadow: none !important;
+      font-weight: 900 !important;
+      letter-spacing: 2px !important;
+      font-size: 2rem !important;
+      -webkit-text-fill-color: unset !important;
+      background: none !important;
+      -webkit-background-clip: unset !important;
+      background-clip: unset !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header" style="display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 2rem;">🤖</span>
+          <h2 style="margin: 0; background: none !important; -webkit-text-fill-color: unset !important; color: var(--primary);">Zachar</h2>
+        </div>
+        <button class="sidebar-close" onclick="toggleSidebar()" style="background: var(--primary); color: var(--dark); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 1.2rem;">✕</button>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>🎮 Jeux</h3>
+        <div class="history-list">
+          <button class="game-btn" onclick="openGame('guess')" style="width: 100%; margin-bottom: 0.5rem;">🎯 Deviner</button>
+          <button class="game-btn" onclick="openGame('snake')" style="width: 100%; margin-bottom: 0.5rem;">🐍 Snake</button>
+          <button class="game-btn" onclick="openGame('pacman')" style="width: 100%; margin-bottom: 0.5rem;">👻 Pacman</button>
+          <button class="game-btn" onclick="openGame('draw')" style="width: 100%;">🎨 Dessiner</button>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>🛠️ Outils</h3>
+        <div class="history-list">
+          <button class="game-btn" onclick="openTool('calc')" style="width: 100%; margin-bottom: 0.5rem;">🧮 Calculatrice</button>
+          <button class="game-btn" onclick="openTool('timer')" style="width: 100%; margin-bottom: 0.5rem;">⏱️ Minuteur</button>
+          <button class="game-btn" onclick="openTool('todo')" style="width: 100%; margin-bottom: 0.5rem;">📝 TODO</button>
+          <button class="game-btn" onclick="openTool('quiz')" style="width: 100%; margin-bottom: 0.5rem;">📚 Quiz</button>
+          <button class="game-btn" onclick="openTool('joke')" style="width: 100%; margin-bottom: 0.5rem;">😂 Blagues</button>
+          <button class="game-btn" onclick="openTool('converter')" style="width: 100%;">🔄 Convertisseur</button>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="btn-settings btn-blue" onclick="afficherSettings()">⚙️ Paramètres</button>
+      </div>
+    </div>
+
+    <!-- SIDEBAR OVERLAY (pour fermer en cliquant dehors) -->
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+      <!-- HEADER -->
+      <div class="header">
+        <button class="sidebar-toggle" onclick="toggleSidebar()" style="background: linear-gradient(135deg, #FFD700, #FFA500) !important; color: #000; border: none !important; border-radius: 8px; width: 45px; height: 45px; cursor: pointer; padding: 0 !important; box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4); transition: all 0.3s ease; display: flex !important; flex-direction: column; justify-content: center; align-items: center; gap: 6px;">
+          <span style="width: 24px; height: 3px; background: #000 !important; border-radius: 2px; display: block; margin: 0 auto;"></span>
+          <span style="width: 24px; height: 3px; background: #000 !important; border-radius: 2px; display: block; margin: 0 auto;"></span>
+          <span style="width: 24px; height: 3px; background: #000 !important; border-radius: 2px; display: block; margin: 0 auto;"></span>
+        </button>
+        <h1 class="zachar-title">Zachar IA</h1>
+        <div class="header-spacer"></div>
+        <a href="/" class="btn-home">🏠 Accueil</a>
+      </div>
+
+      <!-- CHAT CONTAINER -->
+      <div class="chat-container">
+        <div class="zone-chat" id="zone-chat"></div>
+      </div>
+
+      <!-- INPUT FORM -->
+      <form class="formulaire" onsubmit="envoyerMessage(event)">
+        <input type="text" class="champ-texte" id="champ-texte" placeholder="Pose-moi une question..." autocomplete="off">
+        <button type="submit" class="btn-primary btn-green" id="bouton-envoyer">Envoyer ✓</button>
+        <button type="button" class="btn-primary btn-purple" onclick="toggleVoiceInput()" title="Parler">🎤</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SETTINGS PANEL -->
+  <div class="settings-panel" id="settings-panel">
+    <h3>⚙️ Paramètres</h3>
+    <div class="settings-content">
+      <div>
+        <label>👤 Ton nom:</label>
+        <input type="text" id="input-name" placeholder="Ton nom" style="width: 100%; padding: 0.5rem; margin-top: 0.5rem; border-radius: 6px; border: 1px solid var(--primary);">
+      </div>
+
+      <div style="margin-top: 1rem;">
+        <label>🌍 Langue:</label>
+        <select id="select-language" style="width: 100%; padding: 0.5rem; margin-top: 0.5rem; border-radius: 6px; border: 1px solid var(--primary);">
+          <option value="fr">Français 🇫🇷</option>
+          <option value="en">English 🇬🇧</option>
+          <option value="ru">Русский 🇷🇺</option>
+          <option value="es">Español 🇪🇸</option>
+          <option value="de">Deutsch 🇩🇪</option>
+        </select>
+      </div>
+
+      <div style="margin-top: 1rem;">
+        <label>🎭 Personnalité:</label>
+        <select id="select-personality" style="width: 100%; padding: 0.5rem; margin-top: 0.5rem; border-radius: 6px; border: 1px solid var(--primary);">
+          <option value="friendly">Amical 😊</option>
+          <option value="professional">Professionnel 💼</option>
+          <option value="funny">Amusant 😄</option>
+          <option value="mysterious">Mystérieux 🌙</option>
+        </select>
+      </div>
+
+      <div style="margin-top: 1rem;">
+        <label>🎨 Thème Couleur:</label>
+        <select id="select-theme" style="width: 100%; padding: 0.5rem; margin-top: 0.5rem; border-radius: 6px; border: 1px solid var(--primary);">
+          <option value="default">Or Classic 💛</option>
+          <option value="neon">Neon Vibe 🟢</option>
+          <option value="sunset">Coucher Soleil 🌅</option>
+          <option value="ocean">Ocean Bleu 🌊</option>
+          <option value="purple">Purple Magic 💜</option>
+        </select>
+      </div>
+
+      <div style="margin-top: 1rem;">
+        <label>🖼️ Fond d'écran:</label>
+        <select id="select-background" style="width: 100%; padding: 0.5rem; margin-top: 0.5rem; border-radius: 6px; border: 1px solid var(--primary);">
+          <option value="default">Par défaut</option>
+          <option value="saros">Saros Boss</option>
+          <option value="gradient1">Gradient Rose</option>
+          <option value="gradient2">Gradient Bleu</option>
+          <option value="gradient3">Gradient Vert</option>
+          <option value="space">Espace Noir</option>
+        </select>
+      </div>
+
+      <div style="margin-top: 1rem;">
+        <label>🔊 Voix et Accent:</label>
+        <select id="select-voice" style="width: 100%; padding: 0.5rem; margin-top: 0.5rem; border-radius: 6px; border: 1px solid var(--primary);">
+          <option value="disabled">❌ Désactivée</option>
+          <optgroup label="Français">
+            <option value="fr-FR-woman">🇫🇷 Femme Parisienne</option>
+            <option value="fr-FR-man">🇫🇷 Homme Parisien</option>
+            <option value="fr-CA-woman">🇨🇦 Femme Québécoise</option>
+          </optgroup>
+          <optgroup label="English">
+            <option value="en-US-woman">🇺🇸 Femme Américaine</option>
+            <option value="en-US-man">🇺🇸 Homme Américain</option>
+            <option value="en-GB-woman">🇬🇧 Femme Britannique</option>
+            <option value="en-GB-man">🇬🇧 Homme Britannique</option>
+          </optgroup>
+          <optgroup label="Español">
+            <option value="es-ES-woman">🇪🇸 Femme Espagnole</option>
+            <option value="es-MX-woman">🇲🇽 Femme Mexicaine</option>
+          </optgroup>
+          <optgroup label="Deutsch">
+            <option value="de-DE-woman">🇩🇪 Femme Allemande</option>
+            <option value="de-DE-man">🇩🇪 Homme Allemand</option>
+          </optgroup>
+          <optgroup label="Русский">
+            <option value="ru-RU-woman">🇷🇺 Femme Russe</option>
+            <option value="ru-RU-man">🇷🇺 Homme Russe</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <div style="margin-top: 1rem;">
+        <label>
+          <input type="checkbox" id="microphone-enabled"> 🎤 Microphone (Parler au lieu de taper)
+        </label>
+      </div>
+
+      <button onclick="saveSettings()" class="btn-green" style="width: 100%; margin-top: 1rem;">✓ Enregistrer</button>
+      <button onclick="closeSettings()" class="btn-red" style="width: 100%; margin-top: 0.5rem;">✕ Fermer</button>
+    </div>
+  </div>
+
+  <!-- GAME CONTAINERS -->
+  <div id="game-guess" class="game-container">
+    <button class="modal-close" onclick="closeGame('guess')">✕</button>
+    <h2>🎯 Deviner le nombre</h2>
+    <p style="color: #FFD700; font-size: 1.1rem; font-weight: 600;">Je pense à un nombre entre 1 et 100</p>
+    <input type="number" id="guess-input" min="1" max="100" style="width: 100%; padding: 0.75rem; margin: 1rem 0; border: 2px solid var(--primary); border-radius: 8px; background: rgba(255,215,0,0.1); color: #FFD700; font-size: 1rem;">
+    <button onclick="checkGuess()" class="game-btn btn-green" style="width: 100%; padding: 0.8rem; font-size: 1rem;">✓ Vérifier</button>
+    <p id="guess-result" style="margin-top: 1rem; text-align: center; font-size: 1.2rem; font-weight: bold; color: #FFD700;"></p>
+  </div>
+
+  <div id="game-snake" class="game-container">
+    <button class="modal-close" onclick="closeGame('snake')">✕</button>
+    <h2>🐍 Snake Pro</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 1.1rem; gap: 1rem;">
+      <div style="flex: 1;">
+        <div style="color: #FFD700;">📊 Score: <span id="snake-score" style="font-weight: bold;">0</span></div>
+        <div style="color: #FFA500; font-size: 0.9rem;">🔥 Combo: <span id="snake-combo" style="font-weight: bold;">0</span></div>
+      </div>
+      <div style="text-align: right;">
+        <div style="color: #4ECDC4;">LVL: <span id="snake-level" style="font-weight: bold;">1</span></div>
+        <div style="color: #FFB703; font-size: 0.9rem;">⚡ Speed: <span id="snake-speed" style="font-weight: bold;">1x</span></div>
+      </div>
+    </div>
+    <canvas id="snake-canvas" width="400" height="400" style="border: 3px solid var(--primary); border-radius: 8px; background: #000; box-shadow: 0 0 20px rgba(255,215,0,0.3);"></canvas>
+    <div style="margin-top: 1rem; font-size: 0.9rem; color: #888;">⬆️⬇️⬅️➡️ pour diriger | Mange les bonus 🍊 (x2 pts)</div>
+  </div>
+
+  <div id="game-pacman" class="game-container">
+    <button class="modal-close" onclick="closeGame('pacman')">✕</button>
+    <h2>👻 Pacman Pro</h2>
+    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; font-size: 1rem;">
+      <div style="color: #FFD700;">🏆 Score: <span id="pacman-score" style="font-weight: bold;">0</span></div>
+      <div style="color: #FFB703;">⭐ Power: <span id="pacman-power" style="font-weight: bold;">OFF</span></div>
+      <div style="color: #FF6B6B;">❤️ Lives: <span id="pacman-lives" style="font-weight: bold;">3</span></div>
+    </div>
+    <canvas id="pacman-canvas" width="400" height="400" style="border: 3px solid var(--primary); border-radius: 8px; background: #000; box-shadow: 0 0 20px rgba(255,215,0,0.3);"></canvas>
+    <div style="margin-top: 1rem; font-size: 0.9rem; color: #888;">⬆️⬇️⬅️➡️ Mets des pellets | 🌟 Mange les power-ups pour inverser!</div>
+  </div>
+
+  <div id="game-draw" class="game-container">
+    <button class="modal-close" onclick="closeGame('draw')">✕</button>
+    <h2>🎨 Dessiner</h2>
+    <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <label style="color: #FFD700;">Couleur:</label>
+      <input type="color" id="draw-color" value="#FFD700" style="width: 50px; height: 30px; border-radius: 4px; cursor: pointer;">
+      <label style="color: #FFD700;">Taille:</label>
+      <input type="range" id="draw-size" min="1" max="20" value="5" style="width: 100px;">
+    </div>
+    <canvas id="draw-canvas" width="400" height="300" style="border: 3px solid var(--primary); margin: 1rem 0; cursor: crosshair; border-radius: 8px; background: rgba(0,0,0,0.5); box-shadow: 0 0 20px rgba(255,215,0,0.3);"></canvas>
+    <div style="display: flex; gap: 0.5rem;">
+      <button onclick="clearCanvas()" class="game-btn" style="flex: 1;">🗑️ Effacer</button>
+      <button onclick="saveDrawing()" class="game-btn" style="flex: 1;">💾 Enregistrer</button>
+    </div>
+  </div>
+
+  <!-- TOOL CONTAINERS -->
+  <div id="tool-calc" class="tool-container">
+    <button class="modal-close" onclick="closeTool('calc')">✕</button>
+    <h2>🧮 Calculatrice</h2>
+    <div id="calc-display" style="background: #333; padding: 1rem; border-radius: 6px; margin: 1rem 0; text-align: right; font-size: 1.5rem;">0</div>
+    <div class="game-grid" style="grid-template-columns: repeat(4, 1fr);">
+      <button onclick="calcAppend('7')" class="game-btn">7</button>
+      <button onclick="calcAppend('8')" class="game-btn">8</button>
+      <button onclick="calcAppend('9')" class="game-btn">9</button>
+      <button onclick="calcAppend('/')" class="game-btn">/</button>
+      <button onclick="calcAppend('4')" class="game-btn">4</button>
+      <button onclick="calcAppend('5')" class="game-btn">5</button>
+      <button onclick="calcAppend('6')" class="game-btn">6</button>
+      <button onclick="calcAppend('*')" class="game-btn">*</button>
+      <button onclick="calcAppend('1')" class="game-btn">1</button>
+      <button onclick="calcAppend('2')" class="game-btn">2</button>
+      <button onclick="calcAppend('3')" class="game-btn">3</button>
+      <button onclick="calcAppend('-')" class="game-btn">-</button>
+      <button onclick="calcAppend('0')" class="game-btn">0</button>
+      <button onclick="calcAppend('.')" class="game-btn">.</button>
+      <button onclick="calcEqual()" class="game-btn">=</button>
+      <button onclick="calcClear()" class="game-btn">C</button>
+    </div>
+  </div>
+
+  <div id="tool-timer" class="tool-container">
+    <button class="modal-close" onclick="closeTool('timer')">✕</button>
+    <h2>⏱️ Minuteur</h2>
+    <div id="timer-display" style="font-size: 3rem; text-align: center; margin: 1rem 0; color: var(--primary);">00:00</div>
+    <input type="number" id="timer-input" min="1" placeholder="Secondes" style="width: 100%; padding: 0.5rem; margin: 1rem 0;">
+    <div class="game-grid" style="grid-template-columns: 1fr 1fr;">
+      <button onclick="startTimer()" class="game-btn">▶ Démarrer</button>
+      <button onclick="stopTimer()" class="game-btn">⏸ Arrêter</button>
+    </div>
+  </div>
+
+  <div id="tool-todo" class="tool-container">
+    <button class="modal-close" onclick="closeTool('todo')">✕</button>
+    <h2>📝 TODO List</h2>
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+      <input type="text" id="todo-input" placeholder="Nouvelle tâche..." style="flex: 1; padding: 0.5rem;">
+      <button onclick="addTodo()" class="game-btn">+</button>
+    </div>
+    <div id="todo-list" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+  </div>
+
+  <div id="tool-quiz" class="tool-container">
+    <button class="modal-close" onclick="closeTool('quiz')">✕</button>
+    <h2>📚 Quiz</h2>
+    <div id="quiz-content"></div>
+  </div>
+
+  <div id="tool-joke" class="tool-container">
+    <button class="modal-close" onclick="closeTool('joke')">✕</button>
+    <h2>😂 Blagues</h2>
+    <p id="joke-text" style="font-size: 1.1rem; margin: 1rem 0; font-style: italic;"></p>
+    <button onclick="getJoke()" class="game-btn" style="width: 100%;">Nouvelle blague</button>
+  </div>
+
+  <div id="tool-converter" class="tool-container">
+    <button class="modal-close" onclick="closeTool('converter')">✕</button>
+    <h2>🔄 Convertisseur</h2>
+    <div style="margin: 1rem 0;">
+      <label>Température (°C → °F):</label>
+      <input type="number" id="temp-input" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+      <button onclick="convertTemp()" class="game-btn" style="width: 100%;">Convertir</button>
+      <p id="temp-result" style="margin-top: 0.5rem;"></p>
+    </div>
+  </div>
+
+  <script>
+    let zacharSettings = {
+      language: 'fr',
+      userName: '',
+      voiceType: 'fr-FR-woman',
+      microphoneEnabled: false,
+      personality: 'friendly',
+      theme: 'default',
+      background: 'default'
+    };
+
+    const elements = {
+      chat: document.getElementById('zone-chat'),
+      input: document.getElementById('champ-texte'),
+      btn: document.getElementById('bouton-envoyer'),
+      sidebar: document.getElementById('sidebar'),
+      settingsPanel: document.getElementById('settings-panel'),
+      inputName: document.getElementById('input-name'),
+      selectLanguage: document.getElementById('select-language'),
+      selectPersonality: document.getElementById('select-personality'),
+      selectTheme: document.getElementById('select-theme'),
+      selectBackground: document.getElementById('select-background'),
+      selectVoice: document.getElementById('select-voice'),
+      microphoneEnabled: document.getElementById('microphone-enabled')
+    };
+
+    const messages = {
+      fr: {
+        welcome: 'Bonjour! Je suis Zachar IA, ton assistant intelligent. Comment puis-je t\'aider?',
+        welcomeNamed: 'Bonjour {name}! Comment puis-je t\'aider?',
+        error: 'Désolé, une erreur s\'est produite. Réessaie!',
+        typing: 'Zachar écrit...'
+      },
+      french: {
+        welcome: 'Bonjour! Je suis Zachar IA, ton assistant intelligent. Comment puis-je t\'aider?',
+        welcomeNamed: 'Bonjour {name}! Comment puis-je t\'aider?',
+        error: 'Désolé, une erreur s\'est produite. Réessaie!',
+        typing: 'Zachar écrit...'
+      },
+      en: {
+        welcome: 'Hello! I\'m Zachar AI. How can I help?',
+        welcomeNamed: 'Hello {name}! How can I help?',
+        error: 'Sorry, an error occurred.',
+        typing: 'Zachar is typing...'
+      },
+      english: {
+        welcome: 'Hello! I\'m Zachar AI. How can I help?',
+        welcomeNamed: 'Hello {name}! How can I help?',
+        error: 'Sorry, an error occurred.',
+        typing: 'Zachar is typing...'
+      },
+      ru: {
+        welcome: 'Привет! Я Захар ИИ. Чем я могу помочь?',
+        welcomeNamed: 'Привет {name}! Чем я могу помочь?',
+        error: 'Извините, произошла ошибка.',
+        typing: 'Захар печатает...'
+      },
+      russian: {
+        welcome: 'Привет! Я Захар ИИ. Чем я могу помочь?',
+        welcomeNamed: 'Привет {name}! Чем я могу помочь?',
+        error: 'Извините, произошла ошибка.',
+        typing: 'Захар печатает...'
+      },
+      es: {
+        welcome: '¡Hola! Soy Zachar IA. ¿Cómo puedo ayudarte?',
+        welcomeNamed: '¡Hola {name}! ¿Cómo puedo ayudarte?',
+        error: 'Lo siento, ocurrió un error.',
+        typing: 'Zachar está escribiendo...'
+      },
+      spanish: {
+        welcome: '¡Hola! Soy Zachar IA. ¿Cómo puedo ayudarte?',
+        welcomeNamed: '¡Hola {name}! ¿Cómo puedo ayudarte?',
+        error: 'Lo siento, ocurrió un error.',
+        typing: 'Zachar está escribiendo...'
+      },
+      de: {
+        welcome: 'Hallo! Ich bin Zachar AI. Wie kann ich dir helfen?',
+        welcomeNamed: 'Hallo {name}! Wie kann ich dir helfen?',
+        error: 'Entschuldigung, ein Fehler ist aufgetreten.',
+        typing: 'Zachar schreibt...'
+      },
+      german: {
+        welcome: 'Hallo! Ich bin Zachar AI. Wie kann ich dir helfen?',
+        welcomeNamed: 'Hallo {name}! Wie kann ich dir helfen?',
+        error: 'Entschuldigung, ein Fehler ist aufgetreten.',
+        typing: 'Zachar schreibt...'
+      }
+    };
+
+    function init() {
+      loadSettings();
+      afficherWelcome();
+      attachEventListeners();
+    }
+
+    function loadSettings() {
+      // D'abord, vérifier s'il y a des données du quiz
+      const quizName = localStorage.getItem('userName');
+      const quizLanguage = localStorage.getItem('userLanguage');
+      const quizInterest = localStorage.getItem('userInterest');
+
+      // Charger les paramètres sauvegardés
+      const saved = localStorage.getItem('zachar_settings');
+      if (saved) {
+        zacharSettings = JSON.parse(saved);
+      }
+
+      // Appliquer les données du quiz si elles existent
+      if (quizName) zacharSettings.userName = quizName;
+      if (quizLanguage) zacharSettings.language = quizLanguage;
+
+      updateUI();
+    }
+
+    function updateUI() {
+      if (elements.inputName) elements.inputName.value = zacharSettings.userName || '';
+      if (elements.selectLanguage) elements.selectLanguage.value = zacharSettings.language;
+      if (elements.selectPersonality) elements.selectPersonality.value = zacharSettings.personality;
+      if (elements.selectTheme) elements.selectTheme.value = zacharSettings.theme;
+      if (elements.selectBackground) elements.selectBackground.value = zacharSettings.background;
+      if (elements.selectVoice) elements.selectVoice.value = zacharSettings.voiceType;
+      if (elements.microphoneEnabled) elements.microphoneEnabled.checked = zacharSettings.microphoneEnabled;
+      applyTheme();
+      applyBackground();
+    }
+
+    function applyTheme() {
+      document.body.className = zacharSettings.theme === 'default' ? '' : `theme-${zacharSettings.theme}`;
+    }
+
+    function applyBackground() {
+      const bgs = {
+        'default': 'linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 50%, #0f0f1e 100%), url("/static/saros-boss.avif")',
+        'saros': 'url("/static/saros-boss.avif")',
+        'gradient1': 'linear-gradient(135deg, #FF6B6B 0%, #FFD700 50%, #FF6348 100%)',
+        'gradient2': 'linear-gradient(135deg, #003D5B 0%, #0099CC 50%, #00D9FF 100%)',
+        'gradient3': 'linear-gradient(135deg, #004E89 0%, #00D9FF 50%, #44A08D 100%)',
+        'space': 'radial-gradient(ellipse at center, #1a0033 0%, #0a0a0f 100%)'
+      };
+      document.body.style.backgroundImage = bgs[zacharSettings.background] || bgs['default'];
+      document.body.style.backgroundSize = 'cover';
+      document.body.style.backgroundPosition = 'center';
+      document.body.style.backgroundAttachment = 'fixed';
+    }
+
+    function afficherWelcome() {
+      let lang = zacharSettings.language || 'fr';
+
+      // Convertir les formats longs en courts si nécessaire
+      if (lang === 'english') lang = 'en';
+      if (lang === 'french') lang = 'fr';
+      if (lang === 'russian') lang = 'ru';
+      if (lang === 'spanish') lang = 'es';
+      if (lang === 'german') lang = 'de';
+
+      // Fallback si la langue n'existe pas
+      if (!messages[lang]) lang = 'fr';
+
+      let msg = zacharSettings.userName
+        ? messages[lang].welcomeNamed.replace('{name}', zacharSettings.userName)
+        : messages[lang].welcome;
+      ajouterMessage('bot', msg);
+    }
+
+    function escapeHTML(text) {
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    function ajouterMessage(role, texte) {
+      const div = document.createElement('div');
+      div.className = `message ${role}`;
+      div.style.cssText = 'display: flex; flex-direction: column;';
+
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'message-content';
+      contentDiv.textContent = texte;
+      div.appendChild(contentDiv);
+
+      if (role === 'bot') {
+        const feedbackDiv = document.createElement('div');
+        feedbackDiv.style.cssText = 'display: flex; gap: 0.5rem; margin-top: 0.5rem;';
+
+        const goodBtn = document.createElement('button');
+        goodBtn.textContent = '👍 Clair';
+        goodBtn.style.cssText = 'background: rgba(100,200,100,0.3); border: 1px solid rgba(100,200,100,0.5); color: white; padding: 0.3rem 0.7rem; border-radius: 4px; cursor: pointer; font-size: 0.85rem;';
+        goodBtn.addEventListener('click', () => {
+          goodBtn.style.background = 'rgba(100,200,100,0.6)';
+          goodBtn.disabled = true;
+          badBtn.disabled = true;
+        });
+
+        const badBtn = document.createElement('button');
+        badBtn.textContent = '👎 Pas clair';
+        badBtn.style.cssText = 'background: rgba(200,100,100,0.3); border: 1px solid rgba(200,100,100,0.5); color: white; padding: 0.3rem 0.7rem; border-radius: 4px; cursor: pointer; font-size: 0.85rem;';
+        badBtn.addEventListener('click', () => {
+          badBtn.style.background = 'rgba(200,100,100,0.6)';
+          badBtn.disabled = true;
+          goodBtn.disabled = true;
+        });
+
+        feedbackDiv.appendChild(goodBtn);
+        feedbackDiv.appendChild(badBtn);
+        div.appendChild(feedbackDiv);
+      }
+
+      elements.chat.appendChild(div);
+      elements.chat.scrollTop = elements.chat.scrollHeight;
+    }
+
+    function envoyerMessage(e) {
+      if (e) e.preventDefault();
+      const texte = elements.input.value.trim();
+      if (!texte) return;
+      console.log('💬 Message reçu:', texte);
+      console.log('🔍 Commence par /quiz?', texte.toLowerCase().startsWith('/quiz'));
+
+      if (texte.toLowerCase().startsWith('/quiz')) {
+        console.log('✅ QUIZ DÉTECTÉ!');
+        const sujet = texte.substring(6).trim();
+        console.log('📚 Sujet:', sujet);
+        if (!sujet) {
+          ajouterMessage('bot', '❌ Utilise: /quiz Sujet (ex: /quiz Math)');
+          elements.input.value = '';
+          return;
+        }
+        ajouterMessage('user', texte);
+        elements.input.value = '';
+        genererQuiz(sujet);
+        return;
+      }
+
+      ajouterMessage('user', texte);
+      elements.input.value = '';
+
+      let lang = zacharSettings.language || 'fr';
+      if (lang === 'english') lang = 'en';
+      if (lang === 'french') lang = 'fr';
+      if (lang === 'spanish') lang = 'es';
+      if (lang === 'german') lang = 'de';
+      if (!messages[lang]) lang = 'fr';
+
+      ajouterMessage('bot', messages[lang]?.typing || 'Zachar écrit...');
+      setTimeout(() => appellerClaude(texte), 200);
+    }
+
+    async function genererQuiz(sujet) {
+      console.log('🎓 Quiz demandé sur:', sujet);
+      ajouterMessage('bot', '🎓 Génération du quiz sur ' + sujet + '...');
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: `Crée un quiz amusant avec 3 questions sur ${sujet}. Pour chaque question, donne 3 réponses possibles (a, b, c) et indique la bonne réponse.`,
+            chatbot_name: 'Zachar IA',
+            user_name: zacharSettings.userName || 'Ami',
+            language: zacharSettings.language
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Erreur ' + response.status);
+        }
+
+        const data = await response.json();
+        console.log('✅ Réponse reçue:', data.response.substring(0, 50));
+
+        // Remplacer le dernier message "Génération..."
+        const botMessages = document.querySelectorAll('.message.bot');
+        if (botMessages.length > 0) {
+          const lastBotMessage = botMessages[botMessages.length - 1];
+          const contentDiv = lastBotMessage.querySelector('.message-content');
+          if (contentDiv) {
+            contentDiv.textContent = data.response;
+          }
+        }
+      } catch (error) {
+        console.error('❌ Erreur quiz:', error);
+        ajouterMessage('bot', '❌ Erreur: ' + error.message);
+      }
+    }
+
+    async function appellerClaude(texte) {
+      try {
+        console.log('📤 Envoi:', texte);
+
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: texte,
+            chatbot_name: 'Zachar IA',
+            user_name: zacharSettings.userName || 'Ami',
+            language: zacharSettings.language
+          })
+        });
+
+        console.log('📥 Réponse HTTP:', response.status);
+
+        if (!response.ok) {
+          let errorDetail = `Erreur ${response.status}`;
+          const contentType = response.headers.get('content-type');
+          if (contentType?.includes('application/json')) {
+            try {
+              const errorData = await response.json();
+              errorDetail = errorData.detail || errorDetail;
+            } catch (e) {
+              console.log('Erreur parsing JSON');
+            }
+          }
+          throw new Error(errorDetail);
+        }
+
+        const data = await response.json();
+        if (!data.response) throw new Error('Réponse vide du serveur');
+        console.log('✓ Données reçues:', data);
+
+        // Trouver et remplacer le dernier message
+        const botMessages = document.querySelectorAll('.message.bot');
+        if (botMessages.length > 0) {
+          const lastBotMessage = botMessages[botMessages.length - 1];
+          const contentDiv = lastBotMessage.querySelector('.message-content');
+          if (contentDiv) {
+            contentDiv.textContent = data.response;
+          }
+        }
+
+        // Voix
+        if (zacharSettings.voiceType !== 'disabled') {
+          console.log('🔊 Activation voix');
+          parlerReponse(data.response);
+        }
+
+      } catch (error) {
+        console.error('❌ Erreur:', error.message);
+
+        let lang = zacharSettings.language || 'fr';
+        if (lang === 'english') lang = 'en';
+        if (lang === 'french') lang = 'fr';
+        if (lang === 'spanish') lang = 'es';
+        if (lang === 'german') lang = 'de';
+        if (!messages[lang]) lang = 'fr';
+
+        const errorMsg = messages[lang]?.error || 'Désolé, une erreur s\'est produite.';
+
+        const botMessages = document.querySelectorAll('.message.bot');
+        if (botMessages.length > 0) {
+          const lastBotMessage = botMessages[botMessages.length - 1];
+          const contentDiv = lastBotMessage.querySelector('.message-content');
+          if (contentDiv) {
+            contentDiv.textContent = `❌ ${errorMsg}`;
+          }
+        }
+      }
+    }
+
+    function parlerReponse(texte) {
+      if (zacharSettings.voiceType === 'disabled') return;
+
+      try {
+        if (speechSynthesis.speaking) speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(texte);
+
+        // Parser le choix de voix (ex: "fr-FR-woman" → lang, gender)
+        const voiceChoice = zacharSettings.voiceType;
+        let lang = 'fr-FR';
+        let gender = 'female';
+
+        if (voiceChoice.includes('-')) {
+          const parts = voiceChoice.split('-');
+          lang = parts[0] + '-' + parts[1];
+          gender = parts[2] === 'man' ? 'male' : 'female';
+        }
+
+        utterance.lang = lang;
+
+        // Configuration ULTRA claire et compréhensible
+        utterance.rate = 0.80;      // Beaucoup plus lent (très clair)
+        utterance.pitch = 1.0;      // Pitch normal
+        utterance.volume = 1.0;
+
+        // Chercher la meilleure voix disponible
+        let voices = speechSynthesis.getVoices();
+
+        if (voices.length > 0) {
+          // Chercher par langue D'ABORD
+          const langPrefix = lang.split('-')[0];
+          let selectedVoice = voices.find(v => v.lang.startsWith(langPrefix));
+
+          // Si toujours rien, prendre la première
+          if (!selectedVoice) selectedVoice = voices[0];
+
+          utterance.voice = selectedVoice;
+          console.log('🗣️ Voix: ' + (selectedVoice.name || 'Défaut'));
+        }
+
+        utterance.onstart = () => {
+          if (elements.input) {
+            elements.input.style.borderColor = '#FFB703';
+            elements.input.style.boxShadow = '0 0 15px rgba(255,183,3,0.7)';
+          }
+        };
+
+        utterance.onend = () => {
+          if (elements.input) {
+            elements.input.style.borderColor = 'rgba(255, 215, 0, 0.2)';
+            elements.input.style.boxShadow = 'none';
+          }
+        };
+
+        utterance.onerror = (e) => console.error('❌ Erreur voix:', e.error);
+
+        console.log('▶️ Lecture:', texte.substring(0, 30) + '...');
+        speechSynthesis.speak(utterance);
+
+      } catch (error) {
+        console.error('❌ Erreur synthèse vocale:', error);
+      }
+    }
+
+    function toggleVoiceInput() {
+      if (!zacharSettings.microphoneEnabled) {
+        alert('🎤 Active le microphone dans les paramètres d\'abord!');
+        return;
+      }
+
+      try {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+          alert('❌ Ton navigateur ne supporte pas la reconnaissance vocale. Essaie Chrome ou Edge!');
+          return;
+        }
+
+        const recognition = new SpeechRecognition();
+
+        // Configuration langue
+        const langMap = {
+          'fr': 'fr-FR', 'french': 'fr-FR',
+          'en': 'en-US', 'english': 'en-US',
+          'es': 'es-ES', 'spanish': 'es-ES',
+          'de': 'de-DE', 'german': 'de-DE',
+          'ru': 'ru-RU', 'russian': 'ru-RU'
+        };
+        recognition.lang = langMap[zacharSettings.language] || 'fr-FR';
+        recognition.continuous = false;
+        recognition.interimResults = true;
+
+        recognition.onstart = () => {
+          elements.input.style.borderColor = '#4ECDC4';
+          elements.input.style.boxShadow = '0 0 10px rgba(78,205,196,0.7)';
+          elements.input.placeholder = '🎤 J\'écoute... (parle maintenant)';
+        };
+
+        recognition.onresult = (event) => {
+          let transcript = '';
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+          }
+          elements.input.value = transcript;
+
+          if (event.results[event.results.length - 1].isFinal) {
+            elements.input.placeholder = 'Pose-moi une question...';
+            envoyerMessage(new Event('submit'));
+          }
+        };
+
+        recognition.onerror = (event) => {
+          console.error('❌ Erreur:', event.error);
+          elements.input.style.borderColor = '#FF6B6B';
+          elements.input.placeholder = 'Pose-moi une question...';
+
+          const messages_errors = {
+            'no-speech': 'Je n\'ai rien entendu... réessaie!',
+            'network': 'Problème de connexion...',
+            'permission-denied': 'Autorise le microphone dans les paramètres du navigateur',
+            'not-allowed': 'Le microphone n\'est pas autorisé'
+          };
+          alert('❌ ' + (messages_errors[event.error] || event.error));
+        };
+
+        recognition.onend = () => {
+          elements.input.style.borderColor = 'rgba(255, 215, 0, 0.2)';
+          elements.input.style.boxShadow = 'none';
+        };
+
+        recognition.start();
+      } catch (error) {
+        console.error('❌ Erreur:', error);
+        alert('❌ Erreur: ' + error.message);
+      }
+    }
+
+    function afficherSettings() { elements.settingsPanel.classList.add('show'); }
+    function closeSettings() { elements.settingsPanel.classList.remove('show'); }
+
+    function saveSettings() {
+      zacharSettings.userName = elements.inputName.value;
+      zacharSettings.language = elements.selectLanguage.value;
+      zacharSettings.personality = elements.selectPersonality.value;
+      zacharSettings.theme = elements.selectTheme.value;
+      zacharSettings.background = elements.selectBackground.value;
+      zacharSettings.voiceType = elements.selectVoice.value;
+      zacharSettings.microphoneEnabled = elements.microphoneEnabled.checked;
+      localStorage.setItem('zachar_settings', JSON.stringify(zacharSettings));
+      applyTheme();
+      applyBackground();
+      closeSettings();
+      alert('✓ Paramètres enregistrés!');
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      if (!sidebar) return;
+      sidebar.classList.toggle('open');
+    }
+
+    function openGame(name) {
+      document.getElementById(`game-${name}`).classList.add('show');
+      if (name === 'snake') initSnake();
+      if (name === 'pacman') initPacman();
+    }
+    function closeGame(name) {
+      document.getElementById(`game-${name}`).classList.remove('show');
+      if (name === 'snake') {
+        if (snakeGame) clearInterval(snakeGame);
+        if (snakeKeyListener) document.removeEventListener('keydown', snakeKeyListener);
+      }
+      if (name === 'pacman') {
+        if (pacmanGame) clearInterval(pacmanGame);
+        if (pacmanKeyListener) document.removeEventListener('keydown', pacmanKeyListener);
+      }
+      if (name === 'draw') {
+        const drawCanvas = document.getElementById('draw-canvas');
+        if (drawCanvas) {
+          drawCanvas.onmousedown = null;
+          drawCanvas.onmousemove = null;
+          drawCanvas.onmouseup = null;
+        }
+      }
+    }
+    function openTool(name) { document.getElementById(`tool-${name}`).classList.add('show'); }
+    function closeTool(name) { document.getElementById(`tool-${name}`).classList.remove('show'); }
+
+    // JEUX
+    let guessNumber = Math.floor(Math.random() * 100) + 1;
+    function checkGuess() {
+      const guess = parseInt(document.getElementById('guess-input').value);
+      const result = document.getElementById('guess-result');
+      if (guess === guessNumber) {
+        result.textContent = `✓ Bravo! Le nombre était ${guessNumber}!`;
+        guessNumber = Math.floor(Math.random() * 100) + 1;
+      } else if (guess < guessNumber) {
+        result.textContent = '⬆️ Trop bas';
+      } else {
+        result.textContent = '⬇️ Trop haut';
+      }
+    }
+
+    // CALCULATRICE
+    let calcValue = '0';
+    function calcAppend(val) {
+      if (calcValue === '0') calcValue = val;
+      else calcValue += val;
+      document.getElementById('calc-display').textContent = calcValue;
+    }
+    function calcEqual() {
+      try {
+        const result = Function('"use strict"; return (' + calcValue + ')')();
+        calcValue = result.toString();
+        document.getElementById('calc-display').textContent = calcValue;
+      } catch { alert('Erreur: calcul invalide'); }
+    }
+    function calcClear() {
+      calcValue = '0';
+      document.getElementById('calc-display').textContent = calcValue;
+    }
+
+    // TODO
+    let todos = [];
+    function addTodo() {
+      const input = document.getElementById('todo-input');
+      if (input.value) {
+        todos.push(input.value);
+        input.value = '';
+        renderTodos();
+      }
+    }
+    function renderTodos() {
+      const list = document.getElementById('todo-list');
+      list.innerHTML = '';
+      todos.forEach((t, i) => {
+        const div = document.createElement('div');
+        div.style.cssText = 'background: rgba(218,165,32,0.1); padding: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between;';
+        const span = document.createElement('span');
+        span.textContent = t;
+        const btn = document.createElement('button');
+        btn.textContent = '✕';
+        btn.style.cssText = 'background:red;color:white;border:none;border-radius:3px;cursor:pointer;padding:0.2rem 0.4rem;';
+        btn.addEventListener('click', () => {
+          todos.splice(i, 1);
+          renderTodos();
+        });
+        div.appendChild(span);
+        div.appendChild(btn);
+        list.appendChild(div);
+      });
+    }
+
+    // MINUTEUR
+    let timerInterval = null;
+    function startTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      const sec = parseInt(document.getElementById('timer-input').value) || 0;
+      if (sec <= 0) {
+        alert('Entrez un nombre positif');
+        return;
+      }
+      let remaining = sec;
+      timerInterval = setInterval(() => {
+        remaining--;
+        if (remaining < 0) remaining = 0;
+        const m = Math.floor(remaining / 60);
+        const s = remaining % 60;
+        document.getElementById('timer-display').textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        if (remaining === 0) { clearInterval(timerInterval); alert('Temps écoulé!'); }
+      }, 1000);
+    }
+    function stopTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    // BLAGUES
+    const jokes = ['Pourquoi les plongeurs plongent-ils toujours en arrière? Parce que sinon ils tombent dans le bateau!', 'Qu\'est-ce qu\'un crocodile qui surveille la pharmacie? Un Lacoste-guard!'];
+    function getJoke() {
+      document.getElementById('joke-text').textContent = jokes[Math.floor(Math.random() * jokes.length)];
+    }
+
+    // CONVERTISSEUR
+    function convertTemp() {
+      const c = parseFloat(document.getElementById('temp-input').value);
+      const f = (c * 9/5) + 32;
+      document.getElementById('temp-result').textContent = `${c}°C = ${f.toFixed(2)}°F`;
+    }
+
+    // SNAKE - ULTRA AMÉLIORÉ
+    let snakeGame = null;
+    let snakeKeyListener = null;
+    function initSnake() {
+      const canvas = document.getElementById('snake-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const gridSize = 20;
+      const cols = canvas.width / gridSize;
+      const rows = canvas.height / gridSize;
+
+      let snake = [{x: 10, y: 10}];
+      let foods = [];
+      let powerups = [];
+      let obstacles = [];
+      let particles = [];
+      let direction = {x: 1, y: 0};
+      let nextDirection = {x: 1, y: 0};
+      let score = 0;
+      let combo = 0;
+      let level = 1;
+      let speed = 120;
+      let powerupMode = null;
+
+      // Générer obstacles initiaux
+      for (let i = 0; i < 5 + level * 2; i++) {
+        let x, y, valid;
+        do {
+          valid = true;
+          x = Math.floor(Math.random() * cols);
+          y = Math.floor(Math.random() * rows);
+          if (Math.abs(x - 10) < 3 || Math.abs(y - 10) < 3) valid = false;
+        } while (!valid);
+        obstacles.push({x, y});
+      }
+
+      foods.push({x: 15, y: 15, type: 'normal'});
+
+      if (snakeKeyListener) document.removeEventListener('keydown', snakeKeyListener);
+      snakeKeyListener = (e) => {
+        if (e.key === 'ArrowUp' && direction.y === 0) nextDirection = {x: 0, y: -1};
+        if (e.key === 'ArrowDown' && direction.y === 0) nextDirection = {x: 0, y: 1};
+        if (e.key === 'ArrowLeft' && direction.x === 0) nextDirection = {x: -1, y: 0};
+        if (e.key === 'ArrowRight' && direction.x === 0) nextDirection = {x: 1, y: 0};
+      };
+      document.addEventListener('keydown', snakeKeyListener);
+
+      function createParticles(x, y, color) {
+        for (let i = 0; i < 8; i++) {
+          particles.push({
+            x: x * gridSize + gridSize / 2,
+            y: y * gridSize + gridSize / 2,
+            vx: (Math.random() - 0.5) * 4,
+            vy: (Math.random() - 0.5) * 4,
+            life: 30,
+            color
+          });
+        }
+      }
+
+      function spawnFood() {
+        let x, y, valid;
+        do {
+          valid = true;
+          x = Math.floor(Math.random() * cols);
+          y = Math.floor(Math.random() * rows);
+          for (let seg of snake) if (seg.x === x && seg.y === y) valid = false;
+          for (let obs of obstacles) if (obs.x === x && obs.y === y) valid = false;
+        } while (!valid);
+
+        let type = 'normal';
+        if (Math.random() > 0.7) type = 'bonus';
+        if (Math.random() > 0.9) type = 'power';
+
+        return {x, y, type, age: 0};
+      }
+
+      function drawGame() {
+        // Fond avec grille animée
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = 'rgba(255,215,0,' + (0.02 + Math.sin(Date.now() / 1000) * 0.01) + ')';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= cols; i++) {
+          ctx.beginPath();
+          ctx.moveTo(i * gridSize, 0);
+          ctx.lineTo(i * gridSize, canvas.height);
+          ctx.stroke();
+        }
+        for (let i = 0; i <= rows; i++) {
+          ctx.beginPath();
+          ctx.moveTo(0, i * gridSize);
+          ctx.lineTo(canvas.width, i * gridSize);
+          ctx.stroke();
+        }
+
+        // Dessiner obstacles
+        ctx.fillStyle = '#444';
+        ctx.shadowColor = 'rgba(100,100,100,0.5)';
+        ctx.shadowBlur = 5;
+        for (let obs of obstacles) {
+          ctx.fillRect(obs.x * gridSize + 2, obs.y * gridSize + 2, gridSize - 4, gridSize - 4);
+        }
+        ctx.shadowColor = 'transparent';
+
+        // Mouvement
+        direction = nextDirection;
+        const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
+
+        // Collision murs
+        if (head.x < 0 || head.x >= cols || head.y < 0 || head.y >= rows) {
+          alert(`💀 GAME OVER!\n🏆 Score: ${score}\n🔥 Combo Max: ${combo}\n📊 Niveau: ${level}`);
+          closeGame('snake');
+          document.removeEventListener('keydown', snakeKeyListener);
+          return;
+        }
+
+        // Collision obstacle
+        for (let obs of obstacles) {
+          if (head.x === obs.x && head.y === obs.y) {
+            alert(`💀 GAME OVER!\n🏆 Score: ${score}\n🔥 Combo Max: ${combo}\n📊 Niveau: ${level}`);
+            closeGame('snake');
+            document.removeEventListener('keydown', snakeKeyListener);
+            return;
+          }
+        }
+
+        // Collision avec soi-même
+        for (let segment of snake) {
+          if (head.x === segment.x && head.y === segment.y) {
+            alert(`💀 GAME OVER!\n🏆 Score: ${score}\n🔥 Combo Max: ${combo}\n📊 Niveau: ${level}`);
+            closeGame('snake');
+            document.removeEventListener('keydown', snakeKeyListener);
+            return;
+          }
+        }
+
+        snake.unshift(head);
+
+        // Manger la nourriture
+        let ate = false;
+        for (let i = 0; i < foods.length; i++) {
+          if (head.x === foods[i].x && head.y === foods[i].y) {
+            let points = 10;
+            if (foods[i].type === 'bonus') points = 25;
+            if (foods[i].type === 'power') {
+              points = 50;
+              powerupMode = {time: 500, type: 'speed'};
+            }
+            score += points * (1 + combo * 0.1);
+            combo++;
+            createParticles(head.x, head.y, foods[i].type === 'power' ? '#FFB703' : '#FF6B6B');
+            ate = true;
+            foods.splice(i, 1);
+            break;
+          }
+        }
+
+        if (!ate) {
+          snake.pop();
+          combo = 0;
+        }
+
+        // Ajouter nourriture
+        while (foods.length < Math.min(2 + Math.floor(level / 2), 5)) {
+          foods.push(spawnFood());
+        }
+
+        // Update particles
+        for (let i = particles.length - 1; i >= 0; i--) {
+          particles[i].life--;
+          particles[i].x += particles[i].vx;
+          particles[i].y += particles[i].vy;
+          if (particles[i].life <= 0) particles.splice(i, 1);
+        }
+
+        // Augmenter la difficulté
+        if (score % 150 === 0 && score > 0) {
+          level = Math.floor(score / 150) + 1;
+          speed = Math.max(50, 120 - level * 15);
+          clearInterval(snakeGame);
+          snakeGame = setInterval(drawGame, speed);
+        }
+
+        // Dessiner le serpent
+        for (let i = 0; i < snake.length; i++) {
+          const segment = snake[i];
+          if (i === 0) {
+            ctx.fillStyle = powerupMode ? '#FFB703' : '#FFA500';
+            ctx.shadowColor = 'rgba(255,165,0,0.8)';
+            ctx.shadowBlur = 12;
+          } else {
+            ctx.fillStyle = '#FFD700';
+            ctx.shadowColor = 'rgba(255,215,0,0.4)';
+            ctx.shadowBlur = 5;
+          }
+          ctx.fillRect(segment.x * gridSize + 1, segment.y * gridSize + 1, gridSize - 2, gridSize - 2);
+        }
+        ctx.shadowColor = 'transparent';
+
+        // Dessiner la nourriture avec animation
+        for (let food of foods) {
+          const pulse = Math.sin(Date.now() / 200 + food.age) * 3;
+          let color = '#FF6B6B';
+          if (food.type === 'bonus') color = '#FFB703';
+          if (food.type === 'power') color = '#00FF00';
+
+          ctx.fillStyle = color;
+          ctx.shadowColor = color + '80';
+          ctx.shadowBlur = 15 + pulse;
+          ctx.beginPath();
+          ctx.arc(food.x * gridSize + gridSize/2, food.y * gridSize + gridSize/2, gridSize/2 - 2 + pulse/5, 0, Math.PI * 2);
+          ctx.fill();
+          food.age++;
+        }
+        ctx.shadowColor = 'transparent';
+
+        // Dessiner particles
+        for (let p of particles) {
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = p.life / 30;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+
+        document.getElementById('snake-score').textContent = score;
+        document.getElementById('snake-combo').textContent = combo;
+        document.getElementById('snake-level').textContent = level;
+        document.getElementById('snake-speed').textContent = (120 / speed).toFixed(1) + 'x';
+      }
+
+      snakeGame = setInterval(drawGame, speed);
+    }
+
+    // PACMAN - ULTRA PRO
+    let pacmanGame = null;
+    let pacmanKeyListener = null;
+    function initPacman() {
+      const canvas = document.getElementById('pacman-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      let pacman = {x: 200, y: 200, r: 14, mouth: 0, vx: 0, vy: 0, invincible: 0};
+      let ghosts = [
+        {x: 50, y: 50, color: '#FF6B6B', vx: 2, vy: 1, state: 'chase'},
+        {x: 350, y: 50, color: '#4ECDC4', vx: -2, vy: 1, state: 'chase'},
+        {x: 200, y: 350, color: '#FFB703', vx: 1, vy: -2, state: 'chase'},
+        {x: 350, y: 350, color: '#BB86FC', vx: -1, vy: -1, state: 'chase'}
+      ];
+      let pellets = [];
+      let powerups = [];
+      let particles = [];
+      let score = 0;
+      let lives = 3;
+      let level = 1;
+      let powerMode = 0;
+
+      // Générer pellets
+      for (let i = 0; i < 50; i++) {
+        pellets.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          eaten: false
+        });
+      }
+
+      // Générer power-ups
+      for (let i = 0; i < 3; i++) {
+        powerups.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          eaten: false,
+          pulse: Math.random() * Math.PI * 2
+        });
+      }
+
+      if (pacmanKeyListener) document.removeEventListener('keydown', pacmanKeyListener);
+      pacmanKeyListener = (e) => {
+        if (e.key === 'ArrowUp') { pacman.vy = -3; pacman.vx = 0; }
+        if (e.key === 'ArrowDown') { pacman.vy = 3; pacman.vx = 0; }
+        if (e.key === 'ArrowLeft') { pacman.vx = -3; pacman.vy = 0; }
+        if (e.key === 'ArrowRight') { pacman.vx = 3; pacman.vy = 0; }
+      };
+      document.addEventListener('keydown', pacmanKeyListener);
+
+      function distance(x1, y1, x2, y2) {
+        return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+      }
+
+      function createParticles(x, y, color) {
+        for (let i = 0; i < 10; i++) {
+          particles.push({
+            x, y,
+            vx: (Math.random() - 0.5) * 4,
+            vy: (Math.random() - 0.5) * 4,
+            life: 20,
+            color
+          });
+        }
+      }
+
+      function drawGame() {
+        // Fond animé
+        const wave = Math.sin(Date.now() / 500);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = 'rgba(255,215,0,' + (0.03 + wave * 0.01) + ')';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 20; i++) {
+          ctx.beginPath();
+          ctx.moveTo(i * 20, 0);
+          ctx.lineTo(i * 20, canvas.height);
+          ctx.stroke();
+        }
+        for (let i = 0; i <= 20; i++) {
+          ctx.beginPath();
+          ctx.moveTo(0, i * 20);
+          ctx.lineTo(canvas.width, i * 20);
+          ctx.stroke();
+        }
+
+        // Mouvement Pacman
+        pacman.x += pacman.vx;
+        pacman.y += pacman.vy;
+        pacman.x = Math.max(pacman.r, Math.min(canvas.width - pacman.r, pacman.x));
+        pacman.y = Math.max(pacman.r, Math.min(canvas.height - pacman.r, pacman.y));
+        if (pacman.invincible > 0) pacman.invincible--;
+
+        // Dessiner pellets
+        ctx.fillStyle = '#FFD700';
+        for (let pellet of pellets) {
+          if (!pellet.eaten) {
+            ctx.fillRect(pellet.x - 2, pellet.y - 2, 4, 4);
+            if (distance(pacman.x, pacman.y, pellet.x, pellet.y) < 25) {
+              pellet.eaten = true;
+              score += 10;
+              createParticles(pellet.x, pellet.y, '#FFD700');
+            }
+          }
+        }
+
+        // Dessiner power-ups
+        ctx.fillStyle = '#00FF00';
+        for (let pup of powerups) {
+          if (!pup.eaten) {
+            pup.pulse += 0.1;
+            const s = 8 + Math.sin(pup.pulse) * 3;
+            ctx.shadowColor = '#00FF0080';
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.arc(pup.x, pup.y, s, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (distance(pacman.x, pacman.y, pup.x, pup.y) < 30) {
+              pup.eaten = true;
+              powerMode = 300;
+              pacman.invincible = 300;
+              score += 100;
+              createParticles(pup.x, pup.y, '#00FF00');
+
+              // Fantômes paniqués
+              for (let g of ghosts) {
+                g.state = 'scared';
+              }
+            }
+          }
+        }
+        ctx.shadowColor = 'transparent';
+
+        // IA fantômes améliorée
+        for (let ghost of ghosts) {
+          if (powerMode > 0) {
+            // Fantômes fuient
+            ghost.vx += (pacman.x - ghost.x > 0 ? -0.2 : 0.2);
+            ghost.vy += (pacman.y - ghost.y > 0 ? -0.2 : 0.2);
+          } else {
+            // Fantômes chassent
+            if (Math.random() > 0.9) {
+              ghost.vx += (pacman.x - ghost.x) * 0.001;
+              ghost.vy += (pacman.y - ghost.y) * 0.001;
+            }
+            ghost.vx += (Math.random() - 0.5) * 0.3;
+            ghost.vy += (Math.random() - 0.5) * 0.3;
+          }
+
+          const speed = Math.sqrt(ghost.vx ** 2 + ghost.vy ** 2);
+          if (speed > 2) {
+            ghost.vx = (ghost.vx / speed) * 2;
+            ghost.vy = (ghost.vy / speed) * 2;
+          }
+
+          ghost.x += ghost.vx;
+          ghost.y += ghost.vy;
+
+          if (ghost.x < 20 || ghost.x > canvas.width - 20) ghost.vx *= -1;
+          if (ghost.y < 20 || ghost.y > canvas.height - 20) ghost.vy *= -1;
+
+          ghost.x = Math.max(20, Math.min(canvas.width - 20, ghost.x));
+          ghost.y = Math.max(20, Math.min(canvas.height - 20, ghost.y));
+
+          // Collision
+          if (distance(pacman.x, pacman.y, ghost.x, ghost.y) < 30) {
+            if (powerMode > 0) {
+              score += 200;
+              ghost.x = Math.random() * canvas.width;
+              ghost.y = Math.random() * canvas.height;
+            } else if (pacman.invincible === 0) {
+              lives--;
+              if (lives <= 0) {
+                alert(`👻 GAME OVER!\n🏆 Score: ${score}\n📊 Level: ${level}`);
+                closeGame('pacman');
+                document.removeEventListener('keydown', pacmanKeyListener);
+                return;
+              }
+              pacman.x = 200;
+              pacman.y = 200;
+              pacman.invincible = 100;
+            }
+          }
+
+          // Dessiner fantôme
+          let color = ghost.color;
+          if (powerMode > 0) color = '#0099FF';
+          ctx.fillStyle = color;
+          ctx.shadowColor = color + '80';
+          ctx.shadowBlur = 15;
+          ctx.beginPath();
+          ctx.arc(ghost.x, ghost.y, 14, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#FFF';
+          ctx.beginPath();
+          ctx.arc(ghost.x - 5, ghost.y - 3, 3, 0, Math.PI * 2);
+          ctx.arc(ghost.x + 5, ghost.y - 3, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.shadowColor = 'transparent';
+
+        // Dessiner Pacman
+        pacman.mouth = (pacman.mouth + 0.15) % (Math.PI * 2);
+        ctx.fillStyle = pacman.invincible > 0 && Math.floor(Date.now() / 100) % 2 ? '#FFB703' : '#FFD700';
+        ctx.shadowColor = 'rgba(255,215,0,0.9)';
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.arc(pacman.x, pacman.y, pacman.r, pacman.mouth, Math.PI * 2 - pacman.mouth);
+        ctx.lineTo(pacman.x, pacman.y);
+        ctx.fill();
+        ctx.shadowColor = 'transparent';
+
+        // Dessiner particles
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.life--;
+          p.x += p.vx;
+          p.y += p.vy;
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = p.life / 20;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+          if (p.life <= 0) particles.splice(i, 1);
+        }
+        ctx.globalAlpha = 1;
+
+        // Augmenter difficulté
+        if (score % 300 === 0 && score > 0) {
+          level = Math.floor(score / 300) + 1;
+          for (let g of ghosts) {
+            g.vx *= 1.05;
+            g.vy *= 1.05;
+          }
+        }
+
+        // Réduire powerMode
+        if (powerMode > 0) powerMode--;
+
+        document.getElementById('pacman-score').textContent = score;
+        document.getElementById('pacman-lives').textContent = lives;
+        document.getElementById('pacman-power').textContent = powerMode > 0 ? `${Math.ceil(powerMode/10)}s` : 'OFF';
+      }
+
+      pacmanGame = setInterval(drawGame, 50);
+    }
+
+    // DESSIN
+    const drawCanvas = document.getElementById('draw-canvas');
+    const drawCtx = drawCanvas ? drawCanvas.getContext('2d') : null;
+    let isDrawing = false;
+
+    if (drawCanvas) {
+      drawCanvas.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        const rect = drawCanvas.getBoundingClientRect();
+        const color = document.getElementById('draw-color')?.value || '#FFD700';
+        const size = parseInt(document.getElementById('draw-size')?.value || 5);
+        drawCtx.fillStyle = color;
+        drawCtx.beginPath();
+        drawCtx.arc(e.clientX - rect.left, e.clientY - rect.top, size/2, 0, Math.PI * 2);
+        drawCtx.fill();
+      });
+
+      drawCanvas.addEventListener('mouseup', () => isDrawing = false);
+      drawCanvas.addEventListener('mouseleave', () => isDrawing = false);
+
+      drawCanvas.addEventListener('mousemove', (e) => {
+        if (isDrawing) {
+          const rect = drawCanvas.getBoundingClientRect();
+          const color = document.getElementById('draw-color')?.value || '#FFD700';
+          const size = parseInt(document.getElementById('draw-size')?.value || 5);
+          drawCtx.fillStyle = color;
+          drawCtx.beginPath();
+          drawCtx.arc(e.clientX - rect.left, e.clientY - rect.top, size/2, 0, Math.PI * 2);
+          drawCtx.fill();
+        }
+      });
+    }
+
+    function clearCanvas() {
+      if (drawCtx) {
+        drawCtx.fillStyle = 'rgba(0,0,0,0.5)';
+        drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+      }
+    }
+    function saveDrawing() { alert('💾 Dessin sauvegardé!'); }
+
+    function attachEventListeners() {
+      elements.btn.addEventListener('click', envoyerMessage);
+      elements.input.addEventListener('keypress', (e) => { if (e.key === 'Enter') envoyerMessage(e); });
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

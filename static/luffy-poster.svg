@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1220" />
+      <stop offset="45%" stop-color="#1a2c52" />
+      <stop offset="100%" stop-color="#081014" />
+    </linearGradient>
+    <linearGradient id="light" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f6b93b" />
+      <stop offset="100%" stop-color="#ff793f" />
+    </linearGradient>
+  </defs>
+  <rect width="900" height="1200" fill="url(#bg)" />
+  <g transform="translate(160 200)">
+    <circle cx="280" cy="260" r="200" fill="url(#light)" opacity="0.95" />
+    <circle cx="280" cy="260" r="170" fill="#121826" />
+    <path d="M120 240 C120 180 160 120 280 120 C400 120 440 180 440 240 C440 300 400 340 280 340 C160 340 120 300 120 240 Z" fill="#f6b93b" />
+    <path d="M150 240 Q280 310 410 240" fill="#ce5c11" opacity="0.9" />
+    <rect x="230" y="300" width="100" height="35" rx="18" fill="#f6b93b" />
+    <rect x="255" y="330" width="30" height="16" rx="8" fill="#27192f" />
+    <rect x="315" y="330" width="30" height="16" rx="8" fill="#27192f" />
+  </g>
+  <text x="50%" y="75%" text-anchor="middle" font-family="Arial, sans-serif" font-size="120" letter-spacing="8" fill="#f6b93b" font-weight="900">LUFFY</text>
+  <text x="50%" y="84%" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" letter-spacing="4" fill="#ffffff" opacity="0.78">ONE PIECE STYLE POSTER</text>
+  <rect x="0" y="0" width="900" height="1200" fill="url(#light)" opacity="0.08" />
+</svg>

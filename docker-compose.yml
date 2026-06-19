@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  zachar-ia:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zachar-ia
+    ports:
+      - "8000:8000"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - HOST=0.0.0.0
+      - PORT=8000
+    volumes:
+      - ./static:/app/static:ro
+      - ./frontend:/app/frontend:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - zachar-network
+
+networks:
+  zachar-network:
+    driver: bridge
