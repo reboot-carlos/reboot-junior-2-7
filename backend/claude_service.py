@@ -38,7 +38,7 @@ class ClaudeService:
         except Exception as e:
             logger.error(f"Claude API error: {type(e).__name__}: {e}")
             self.conversation_history.pop()
-            return "Désolé, je n'ai pas pu traiter votre message. Veuillez réessayer."
+            return f"[DEBUG] {type(e).__name__}: {e}"
 
     def reset_conversation(self):
         self.conversation_history = []
