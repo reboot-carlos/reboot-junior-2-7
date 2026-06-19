@@ -31,7 +31,7 @@ class Settings:
         if not self.api_key:
             raise ValueError("ANTHROPIC_API_KEY non définie dans .env")
 
-        self.api_model = os.getenv("CLAUDE_MODEL", "claude-opus-4-1-20250805")
+        self.api_model = os.getenv("CLAUDE_MODEL", "claude-haiku-4-5")
         self.api_timeout = int(os.getenv("API_TIMEOUT", 30))
 
         # CORS - restrict to safe origins in production

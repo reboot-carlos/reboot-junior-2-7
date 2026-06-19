@@ -94,7 +94,7 @@ curl -X POST http://localhost:8000/api/chat \
 | Variable             | Défaut                     | Description                  |
 |----------------------|----------------------------|------------------------------|
 | `ANTHROPIC_API_KEY`  | *(requis)*                 | Clé API Anthropic            |
-| `CLAUDE_MODEL`       | `claude-opus-4-1-20250805` | Modèle Claude à utiliser     |
+| `CLAUDE_MODEL`       | `claude-haiku-4-5`         | Modèle Claude à utiliser     |
 | `ENVIRONMENT`        | `development`              | `development` ou `production`|
 | `DEBUG`              | `false`                    | Active Swagger UI si `true`  |
 | `PORT`               | `8000`                     | Port du serveur              |
